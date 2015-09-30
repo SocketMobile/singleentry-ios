@@ -149,7 +149,7 @@
 		E7A9C0DD14C4E32300A64DAC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0700;
 				TargetAttributes = {
 					E7A9C0E514C4E32300A64DAC = {
 						DevelopmentTeam = GCJ274LWEE;
@@ -277,6 +277,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -344,12 +345,8 @@
 				GCC_PREFIX_HEADER = "SingleEntry/SingleEntry-Prefix.pch";
 				INFOPLIST_FILE = "SingleEntry/SingleEntry-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/build/Debug-iphoneos",
-					"\"${PODS_ROOT}/ScanAPI/lib\"",
-					"$(PROJECT_DIR)/Pods/ScanAPI/lib",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -367,12 +364,8 @@
 				GCC_PREFIX_HEADER = "SingleEntry/SingleEntry-Prefix.pch";
 				INFOPLIST_FILE = "SingleEntry/SingleEntry-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/build/Debug-iphoneos",
-					"\"${PODS_ROOT}/ScanAPI/lib\"",
-					"$(PROJECT_DIR)/Pods/ScanAPI/lib",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";

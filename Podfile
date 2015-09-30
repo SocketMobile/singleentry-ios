@@ -1,2 +1,2 @@
 xcodeproj 'SingleEntry.xcodeproj'
- pod 'ScanAPI', :path => '../ScanApiSDK-10.2.218'
+ pod 'ScanAPI', :path => '../ScanApiSDK-10.2.219' 
