@@ -26,16 +26,21 @@
 @protocol FlipsideViewControllerDelegate
 - (void)flipsideViewControllerDidFinish:(FlipsideViewController *)controller;
 - (BOOL)isSoftScanEnabled;
+- (BOOL)isLastNonSoftScanDeviceConnected;
+- (int)getDeviceNofitications;
 -(NSString*)getScanApiVersion;
 @end
 
 @interface FlipsideViewController : UIViewController
 @property BOOL softScannerEnabled;
+@property int deviceNotifications;
 @property (weak, nonatomic) IBOutlet UILabel *scanApiVersion;
 @property (weak, nonatomic) IBOutlet UISwitch *enableSoftScan;
 @property (weak, nonatomic) IBOutlet id <FlipsideViewControllerDelegate> delegate;
+@property (weak, nonatomic) IBOutlet UISwitch *batteryLevel;
 
 - (BOOL) hasSoftScanChanged;
 - (IBAction)done:(id)sender;
-
+- (BOOL) hasBatteryLevelChanged;
+- (IBAction)changeBatteryLevel:(id)sender;
 @end

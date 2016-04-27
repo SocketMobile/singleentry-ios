@@ -20,10 +20,12 @@
 //
 
 #import "FlipsideViewController.h"
+#import "ScanApiHelper.h"
 
 @implementation FlipsideViewController
 {
     BOOL _originalSoftScanState;
+    int _originalDeviceNotifications;
 }
 @synthesize delegate = _delegate;
 
@@ -47,8 +49,16 @@
 	// Do any additional setup after loading the view, typically from a nib.
     _scanApiVersion.text=[self.delegate getScanApiVersion];
     _originalSoftScanState=[self.delegate isSoftScanEnabled];
+    _originalDeviceNotifications=[self.delegate getDeviceNofitications];
+    _deviceNotifications=_originalDeviceNotifications;
     _softScannerEnabled=_originalSoftScanState;
     _enableSoftScan.on=_softScannerEnabled;
+    if([self.delegate isLastNonSoftScanDeviceConnected]){
+    _batteryLevel.on=(_originalDeviceNotifications&kSktScanNotificationsBatteryLevelChange)==kSktScanNotificationsBatteryLevelChange;
+    }
+    else{
+        _batteryLevel.enabled=NO;
+    }
 }
 
 - (void)viewDidUnload
@@ -92,7 +102,28 @@
 {
     return (_originalSoftScanState!=self.enableSoftScan.isOn);
 }
+
+-(BOOL)hasBatteryLevelChanged
+{
+    if([self.delegate isLastNonSoftScanDeviceConnected]){
+        return (_originalDeviceNotifications!= _deviceNotifications);
+    }
+    else{
+        return FALSE;
+    }
+}
+
 #pragma mark - Actions
+
+- (IBAction)changeBatteryLevel:(id)sender {
+//    _batteryLevel.on = !_batteryLevel.on;
+    if(_batteryLevel.on){
+        _deviceNotifications|=kSktScanNotificationsBatteryLevelChange;
+    }
+    else{
+        _deviceNotifications&=~kSktScanNotificationsBatteryLevelChange;
+    }
+}
 
 - (IBAction)done:(id)sender
 {

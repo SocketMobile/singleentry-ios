@@ -43,11 +43,13 @@
 @implementation MainViewController
 {
 #ifdef USE_SOFTSCAN
-    DeviceInfo* _softScanDeviceInfo;
+    __weak DeviceInfo* _softScanDeviceInfo;
 #endif
-    DeviceInfo* _deviceInfoToTrigger;
+    __weak DeviceInfo* _deviceInfoToTrigger;
     NSDate* _lastCheck;
     NSInteger _sameSecondCount;
+    int _deviceNotifications;
+    __weak DeviceInfo* _lastDeviceNonSoftScanConnected;
 }
 
 @synthesize flipsidePopoverController = _flipsidePopoverController;
@@ -68,7 +70,9 @@
 {
     [super viewDidLoad];
     _devices=[[NSMutableArray alloc]init];
-
+    _deviceNotifications = 0;// by default we assume the device has not notifications
+    _lastDeviceNonSoftScanConnected = nil;
+    
     // change this to YES if you want SingleEntry to
     // confirm the decoded data
     _doAppDataConfirmation=NO;
@@ -163,6 +167,11 @@
             action=kSktScanEnableSoftScan;
         [ScanApi postSetSoftScanStatus:action Target:self Response:@selector(onSetSoftScanStatus:)];
     }
+    
+    if(controller.hasBatteryLevelChanged){
+        _deviceNotifications = controller.deviceNotifications;
+        [ScanApi postSetNotificationsForDevice:_lastDeviceNonSoftScanConnected forNotifications:_deviceNotifications Target:self Response:@selector(onSetDeviceNotifications:)];
+    }
 #endif
 
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
@@ -171,6 +180,16 @@
         [self.flipsidePopoverController dismissPopoverAnimated:YES];
         self.flipsidePopoverController = nil;
     }
+}
+
+- (int)getDeviceNofitications
+{
+    return _deviceNotifications;
+}
+
+- (BOOL)isLastNonSoftScanDeviceConnected
+{
+    return (_lastDeviceNonSoftScanConnected!=nil);
 }
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
@@ -226,6 +245,9 @@
     NSMutableString* temp=[[NSMutableString alloc]init];
     for (DeviceInfo* info in _devices) {
         [temp appendString:[info getName]];
+        if(info.getBatteryLevel.length>0 ){
+            [temp appendString:[NSString stringWithFormat:@" %@",[info getBatteryLevel]]];
+        }
         [temp appendString:@"\n"];
     }
     if(_devices.count>0)
@@ -277,6 +299,56 @@
     SKTRESULT result=[[scanObj Msg]Result];
     if(!SKTSUCCESS(result)){
         // display an error message saying a symbology cannot be set
+    }
+}
+
+// callback received when the postGetNotificationsFromDevice is completed
+-(void)onGetDeviceNotifications:(ISktScanObject*)scanObj{
+    SKTRESULT result=[[scanObj Msg]Result];
+    if(SKTSUCCESS(result)){
+        _deviceNotifications = (int) [[scanObj Property] getUlong];
+    }
+}
+// callback received when the postSetNotificationsForDevice is completed
+-(void)onSetDeviceNotifications:(ISktScanObject*)scanObj{
+    SKTRESULT result=[[scanObj Msg]Result];
+    if(SKTSUCCESS(result)){
+        NSLog(@"SetDeviceNotifications OK");
+    }
+    else{
+        NSLog(@"SetDeviceNotifications Error %ld",result);
+        _deviceNotifications=0;// by default we reset the notifications to 0
+        if(result == ESKT_NOTSUPPORTED){
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                            message:@"This device does not support battery level notification"
+                                                           delegate:self
+                                                  cancelButtonTitle:@"OK"
+                                                  otherButtonTitles:nil];
+            [alert show];
+        }
+        else{
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                            message:[NSString stringWithFormat: @"Unable to set the device notification, Error %ld", result ]
+                                                           delegate:self
+                                                  cancelButtonTitle:@"OK"
+                                                  otherButtonTitles:nil];
+            [alert show];
+        }
+    }
+}
+
+// callback received when the postGetNotificationsFromDevice is completed
+-(void)onGetBatteryLevel:(ISktScanObject*)scanObj{
+    SKTRESULT result=[[scanObj Msg]Result];
+    if(SKTSUCCESS(result)){
+        NSLog(@"Get Device Battery Level OK: %d",SKTBATTERY_GETCURLEVEL([[scanObj Property]getUlong]));
+        DeviceInfo* deviceInfo = [ScanApi getDeviceInfoFromScanObject:scanObj];
+        [deviceInfo setBatteryLevel:[NSString stringWithFormat:@"%d%%",SKTBATTERY_GETCURLEVEL([[scanObj Property]getUlong])]];
+        [self updateDevicesList:deviceInfo Add:NO];
+        [self updateDevicesList:deviceInfo Add:YES];
+    }
+    else{
+        NSLog(@"Get Device Battery Level Error %ld",result);
     }
 }
 
@@ -425,6 +497,7 @@
     else
 #endif
     {
+        _lastDeviceNonSoftScanConnected = deviceInfo;
         if([deviceInfo.getTypeString compare:@"CHS 8Ci Scanner"]==NSOrderedSame){
             _softScannerTriggerBtn.hidden=NO;
             _deviceInfoToTrigger=deviceInfo;
@@ -445,6 +518,17 @@
         // and in the onGetSymbologyDpm callback, if the DPM is not already set
         // then we send a Symbology property to enable it.
         [ScanApi postGetSymbologyInfo:deviceInfo SymbologyId:kSktScanSymbologyDirectPartMarking Target:self Response:@selector(onGetSymbologyDpm:)];
+        
+        
+        // Also for demonstration only check the scanner notifications to update
+        // the UI about Battery Level notifications
+        [ScanApi postGetNotificationsFromDevice:deviceInfo Target:self Response:@selector(onGetDeviceNotifications:)];
+        
+        // Retrieve the device battery level to display the current Battery Level
+        // that will then be refreshed each time a Battery Level notification is received
+        // from the scanner
+        [ScanApi postGetBattery:deviceInfo Target:self Response:@selector(onGetBatteryLevel:)];
+        
     }
 
 }
@@ -546,4 +630,22 @@
     _Status.text=[NSString stringWithFormat:@"Error retrieving ScanObject:%ld",result];
 }
 
+/**
+ * called each time the device battery level changes.
+ * The notification parameter contains the level of the device battery including the range min and max.
+ * Most of the scanners report a range from 0 to 100, where the value can then be expressed in percentile.
+ *
+ */
+-(void) onEventBatteryLevelResult:(long)result device:(DeviceInfo*) deviceInfo batteryLevel:(int)battery
+{
+    if(SKTSUCCESS(result)){
+        NSLog(@"On Device Battery Level Change: %d",SKTBATTERY_GETCURLEVEL(battery));
+        [deviceInfo setBatteryLevel:[NSString stringWithFormat:@"%d%%",SKTBATTERY_GETCURLEVEL(battery)]];
+        [self updateDevicesList:deviceInfo Add:NO];
+        [self updateDevicesList:deviceInfo Add:YES];
+    }
+    else{
+        NSLog(@"On Device Battery Level Change: %ld",result);
+    }
+}
 @end
