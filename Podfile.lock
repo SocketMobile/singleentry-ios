@@ -1,14 +1,16 @@
 PODS:
-  - ScanAPI (10.3.29)
+  - ScanAPI (10.3.36)
 
 DEPENDENCIES:
-  - ScanAPI (from `../ScanApiSDK-10.3.29`)
+  - ScanAPI (from `../ScanApiSDK-10.3.36`)
 
 EXTERNAL SOURCES:
   ScanAPI:
-    :path: ../ScanApiSDK-10.3.29
+    :path: ../ScanApiSDK-10.3.36
 
 SPEC CHECKSUMS:
-  ScanAPI: dbd251400c4f764f3fc828efeea1446818af58f5
+  ScanAPI: 9e8e284d0a83add771f340289404b9a19626cd6c
 
-COCOAPODS: 0.39.0
+PODFILE CHECKSUM: d2df82657620a950b4120f1cc54254d4e15479ff
+
+COCOAPODS: 1.0.0
