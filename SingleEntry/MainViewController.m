@@ -508,7 +508,7 @@
             // if none is set, the scanner will beep only once when SingleEntry actually
             // confirm the decoded data, otherwise the scanner will beep twice, one locally,
             // and one when SingleEntry will confirm the decoded data
-            [ScanApi postSetDecodeAction:deviceInfo DecodeAction:kSktScanLocalDecodeActionNone Target:self Response:@selector(onSetLocalDecodeAction:)];
+            [ScanApi postSetDecodeActionDevice:deviceInfo DecodeAction:kSktScanLocalDecodeActionNone Target:self Response:@selector(onSetLocalDecodeAction:)];
 
     //        [ScanApi postSetDecodeAction:deviceInfo DecodeAction:kSktScanLocalDecodeActionBeep|kSktScanLocalDecodeActionFlash|kSktScanLocalDecodeActionRumble Target:self Response:@selector(onSetLocalDecodeAction:)];
         }
@@ -575,7 +575,7 @@
         _Entry.text=[NSString stringWithUTF8String:(const char *)[decodedData getData]];
 
         if(_doAppDataConfirmation==YES){
-            [ScanApi postSetDataConfirmation:device Target:self Response:@selector(onDataConfirmation:)];
+            [ScanApi postSetDataConfirmation:device goodData:true Target:self Response:@selector(onDataConfirmation:)];
         }
     }
 }
