@@ -55,7 +55,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>LSApplicationCategoryType</key>
-	<string></string>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera is used by SoftScan to scan barcodes</string>
 </dict>
 </plist>
