@@ -1,2 +1,2 @@
 target 'SingleEntry'
- pod 'ScanAPI', :path => '../ScanApiSDK-10.3.90'
+ pod 'ScanAPI', :path => '../ScanApiSDK-10.3.91'
