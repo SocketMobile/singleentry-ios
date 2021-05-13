@@ -1,4 +1,13 @@
-# SingleEntry for iOS
+# DEPRECATED ⛔️
+This sample app uses ScanAPI SDK which is EOL and has been replaced by our
+Capture SDK which offer the same features and is easier to use.
+
+Please check https://github.com/SocketMobile/capturesingleentry-ios and
+https://github.com/SocketMobile/capturesingleentryswift-ios
+
+The new Capture SDK supports all of our Socket Mobile devices.
+
+SingleEntry for iOS
 This simple iOS app is a sample code for using ScanAPI SDK.
 
 ## IMPORTANT
